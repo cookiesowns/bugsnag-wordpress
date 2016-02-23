@@ -58,17 +58,25 @@ class Bugsnag_Wordpress
             return;
         }
 
-        // Load bugsnag settings
-        if ( ! get_site_option('bugsnag_network')) {
-            // Regular
-            $this->apiKey           = get_option( 'bugsnag_api_key' );
-            $this->notifySeverities = get_option( 'bugsnag_notify_severities' );
-            $this->filterFields     = get_option( 'bugsnag_filterfields' );
+        //Load bugsnag settings
+        if( get_site_option('bugsnag_network') ) {
+          // Multisite
+          $this->apiKey           = get_site_option( 'bugsnag_api_key' );
+          $this->notifySeverities = get_site_option( 'bugsnag_notify_severities' );
+          $this->filterFields     = get_site_option( 'bugsnag_filterfields' );
+
+        } else if( defined( 'BUGSNAG_API_KEY' ) && WP_ENV != 'production' ) {
+          // Allow different API_KEY than one set in dashboard for dev ENV
+          $this->apiKey           = BUGSNAG_API_KEY;
+          $this->notifySeverities = defined( 'BUGSNAG_NOTIFY_SEVERITIES' ) ? BUGSNAG_NOTIFY_SEVERITIES : get_option( 'bugsnag_notify_severities' );
+          $this->filterFields     = defined( 'BUGSNAG_FILTERFIELDS' ) ? BUGSNAG_FILTERFIELDS : get_option( 'bugsnag_filterfields' );
+
         } else {
-            // Multisite
-            $this->apiKey           = get_site_option( 'bugsnag_api_key' );
-            $this->notifySeverities = get_site_option( 'bugsnag_notify_severities' );
-            $this->filterFields     = get_site_option( 'bugsnag_filterfields' );
+          // Load regular bugsnag settings
+          $this->apiKey           = get_option( 'bugsnag_api_key' );
+          $this->notifySeverities = get_option( 'bugsnag_notify_severities' );
+          $this->filterFields     = get_option( 'bugsnag_filterfields' );
+
         }
 
         $this->constructBugsnag();
